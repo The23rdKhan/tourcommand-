@@ -273,10 +273,11 @@ const Settings: React.FC = () => {
 
         {activeTab === 'integrations' && (
              <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                <h2 className="text-xl font-semibold text-white mb-6">Connected Apps</h2>
+                <h2 className="text-xl font-semibold text-white mb-2">Integrations</h2>
+                <p className="text-slate-400 text-sm mb-6">Connect your favorite tools to streamline your workflow.</p>
                 <div className="space-y-4">
-                    {/* Free Integration */}
-                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg">
+                    {/* Eventbrite - Coming Soon */}
+                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg opacity-75">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-white rounded flex items-center justify-center font-bold text-slate-900">EB</div>
                             <div>
@@ -285,18 +286,12 @@ const Settings: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">Free</span>
-                            <button 
-                                onClick={() => trackEvent('integration_connect_clicked', { service: 'eventbrite' })}
-                                className="text-sm border border-slate-600 text-slate-300 px-3 py-1 rounded hover:bg-slate-800"
-                            >
-                                Connect
-                            </button>
+                            <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Coming Soon</span>
                         </div>
                     </div>
 
-                    {/* Free Integration */}
-                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg">
+                    {/* Square - Coming Soon */}
+                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg opacity-75">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-sky-500 rounded flex items-center justify-center font-bold text-white">SQ</div>
                             <div>
@@ -305,53 +300,42 @@ const Settings: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">Free</span>
-                            <button 
-                                onClick={() => trackEvent('integration_connect_clicked', { service: 'square' })}
-                                className="text-sm border border-slate-600 text-slate-300 px-3 py-1 rounded hover:bg-slate-800"
-                            >
-                                Connect
-                            </button>
+                            <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Coming Soon</span>
                         </div>
                     </div>
 
-                    {/* Pro Integration (Upsell) */}
-                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-700 relative overflow-hidden">
-                        <div className="flex items-center gap-3 opacity-90">
+                    {/* QuickBooks - Coming Soon */}
+                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg opacity-75">
+                        <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-green-600 rounded flex items-center justify-center font-bold text-white">QB</div>
                             <div>
                                 <div className="text-white font-medium">QuickBooks</div>
                                 <div className="text-xs text-slate-500">Sync expenses to accounting</div>
                             </div>
                         </div>
-                         <div className="flex items-center gap-4">
-                            <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded flex items-center gap-1 border border-indigo-500/30"><Crown size={10}/> Pro</span>
-                            {user?.tier === 'Free' ? (
-                                 <button onClick={() => handleTabChange('billing')} className="text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 font-medium">Upgrade</button>
-                            ) : (
-                                 <button className="text-sm border border-slate-600 text-slate-300 px-3 py-1 rounded hover:bg-slate-800">Connect</button>
-                            )}
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Coming Soon</span>
                         </div>
                     </div>
 
-                    {/* Pro Integration (Upsell) */}
-                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-700 relative overflow-hidden">
-                        <div className="flex items-center gap-3 opacity-90">
+                    {/* Slack - Coming Soon */}
+                    <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg opacity-75">
+                        <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-purple-600 rounded flex items-center justify-center font-bold text-white">SL</div>
                             <div>
                                 <div className="text-white font-medium">Slack</div>
                                 <div className="text-xs text-slate-500">Daily tour reports to channel</div>
                             </div>
                         </div>
-                         <div className="flex items-center gap-4">
-                            <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded flex items-center gap-1 border border-indigo-500/30"><Crown size={10}/> Pro</span>
-                             {user?.tier === 'Free' ? (
-                                 <button onClick={() => handleTabChange('billing')} className="text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 font-medium">Upgrade</button>
-                            ) : (
-                                 <button className="text-sm border border-slate-600 text-slate-300 px-3 py-1 rounded hover:bg-slate-800">Connect</button>
-                            )}
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded">Coming Soon</span>
                         </div>
                     </div>
+                </div>
+                <div className="mt-6 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+                    <p className="text-indigo-300 text-sm">
+                        <strong>Want an integration?</strong> We're actively building new integrations. Email us at <a href="mailto:support@tourcommand.app" className="underline hover:text-indigo-200">support@tourcommand.app</a> with your requests.
+                    </p>
                 </div>
              </div>
         )}

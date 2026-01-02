@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Music2, TrendingUp, Calendar, DollarSign, CheckCircle, ArrowRight, Star, BarChart3, PieChart, Users, Map, Briefcase, Building2, Bot, Sparkles, MessageSquare, Zap, Globe, Shield, Truck, FileText } from 'lucide-react';
 
-const MarketingHeader: React.FC = () => {
+export const MarketingHeader: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md transition-all duration-300">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
@@ -16,6 +16,8 @@ const MarketingHeader: React.FC = () => {
           <Link to="/" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Home</Link>
           <Link to="/features" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Features</Link>
           <Link to="/pricing" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Pricing</Link>
+          <Link to="/about" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">About</Link>
+          <Link to="/help" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Help</Link>
         </nav>
         <div className="flex items-center gap-4">
           <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Log in</Link>
@@ -26,7 +28,7 @@ const MarketingHeader: React.FC = () => {
   );
 };
 
-const MarketingFooter: React.FC = () => {
+export const MarketingFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
   
   return (
@@ -44,6 +46,8 @@ const MarketingFooter: React.FC = () => {
                 <Link to="/" className="hover:text-white transition-colors">Home</Link>
                 <Link to="/features" className="hover:text-white transition-colors">Features</Link>
                 <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+                <Link to="/about" className="hover:text-white transition-colors">About</Link>
+                <Link to="/help" className="hover:text-white transition-colors">Help</Link>
                 <Link to="/login" className="hover:text-white transition-colors">Login</Link>
                 <Link to="/signup" className="hover:text-white transition-colors">Get Started</Link>
             </nav>
@@ -76,21 +80,21 @@ export const Home: React.FC = () => {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-50 rounded-full blur-3xl -z-10 opacity-60"></div>
 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wide mb-8 animate-fade-in">
-            <Shield size={12} className="fill-indigo-700" /> New: Crew Management & Vendor Compliance
+            <Shield size={12} className="fill-indigo-700" /> Tour Management Made Simple
           </div>
 
           <h1 className="text-6xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-[1.1] animate-fade-in">
             Master your tour.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Automate the busy work.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Track every dollar.</span>
           </h1>
           
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in delay-100">
-            The first data-driven platform that connects your routing, your sales, your crew, and your wallet. Stop guessing your profit—start engineering it.
+            The tour management platform that connects your shows, finances, and logistics. Stop estimating. Start tracking every dollar.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in delay-200">
             <Link to="/signup" className="px-8 py-4 bg-indigo-600 text-white rounded-full font-semibold text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 hover:shadow-2xl hover:shadow-indigo-300 transform hover:-translate-y-1 flex items-center gap-2">
-              Start Free Trial <ArrowRight size={20} />
+              Get Started Free <ArrowRight size={20} />
             </Link>
             <Link to="/features" className="px-8 py-4 bg-white text-slate-700 rounded-full font-semibold text-lg hover:bg-slate-50 transition-all border border-slate-200 shadow-sm hover:shadow-md">
               See How It Works
@@ -159,12 +163,12 @@ export const Home: React.FC = () => {
                     <h3 className="text-xl font-bold text-slate-900 mb-2">The Artist</h3>
                     <div className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-4">Focus: Logistics & Performance</div>
                     <p className="text-slate-600 mb-6 leading-relaxed">
-                        Forget the spreadsheets. Build your route visually, calculate gas costs automatically, and access your day sheets from your phone.
+                        Forget the spreadsheets. Build your route visually, track distances and costs, and manage your show schedule from anywhere.
                     </p>
                     <ul className="space-y-3">
-                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Smart Routing Engine</li>
-                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Automated Day Sheets</li>
-                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Mobile Itinerary</li>
+                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Route Distance Tracking</li>
+                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Show Schedule & Logistics</li>
+                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Financial Tracking</li>
                     </ul>
                 </div>
 
@@ -196,9 +200,9 @@ export const Home: React.FC = () => {
                         Fill your room. Manage holds, challenges, and confirmed dates in a unified calendar. Stop double-booking and start optimizing.
                     </p>
                     <ul className="space-y-3">
-                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Venue Utilization Heatmaps</li>
-                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Hold/Challenge Pipeline</li>
-                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Multi-venue Calendar</li>
+                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Venue Database</li>
+                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Booking Status Tracking</li>
+                        <li className="flex items-center gap-2 text-sm text-slate-700"><CheckCircle size={16} className="text-emerald-500"/> Show Pipeline View</li>
                     </ul>
                 </div>
             </div>
@@ -223,8 +227,8 @@ export const Home: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                         <div className="p-4 rounded-xl bg-slate-800 border border-slate-700">
                             <Zap className="text-amber-400 mb-3" size={24} />
-                            <h4 className="font-bold text-white mb-2">Predictive Logistics</h4>
-                            <p className="text-sm text-slate-400">Our routing engine calculates drive times, impossible travel days, and gas costs instantly.</p>
+                            <h4 className="font-bold text-white mb-2">Route Tracking</h4>
+                            <p className="text-sm text-slate-400">Calculate distances between shows and estimate travel costs for better planning.</p>
                         </div>
                         <div className="p-4 rounded-xl bg-slate-800 border border-slate-700">
                             <PieChart className="text-emerald-400 mb-3" size={24} />
@@ -233,13 +237,13 @@ export const Home: React.FC = () => {
                         </div>
                         <div className="p-4 rounded-xl bg-slate-800 border border-slate-700">
                             <Truck className="text-sky-400 mb-3" size={24} />
-                            <h4 className="font-bold text-white mb-2">Crew Portal</h4>
+                            <h4 className="font-bold text-white mb-2">Vendor Database</h4>
                             <p className="text-sm text-slate-400">Centralized vendor database. Track contacts, roles, and permit requirements for every show.</p>
                         </div>
                         <div className="p-4 rounded-xl bg-slate-800 border border-slate-700">
                             <Shield className="text-rose-400 mb-3" size={24} />
-                            <h4 className="font-bold text-white mb-2">Compliance Tracking</h4>
-                            <p className="text-sm text-slate-400">Never miss a permit deadline. Track security, pyro, and insurance requirements.</p>
+                            <h4 className="font-bold text-white mb-2">Compliance Notes</h4>
+                            <p className="text-sm text-slate-400">Track security, pyro, and special requirements in vendor notes and show details.</p>
                         </div>
                     </div>
                 </div>
@@ -433,15 +437,15 @@ export const Features: React.FC = () => {
                     <ul className="space-y-4 pt-4">
                         <li className="flex items-center gap-3 text-slate-700 font-medium">
                             <CheckCircle className="text-indigo-600" size={20} /> 
-                            <strong>Smart Routing:</strong> Automatic distance calculations, drive times, and gas cost estimates.
+                            <strong>Distance Tracking:</strong> Calculate distances between venues and estimate travel costs.
                         </li>
                         <li className="flex items-center gap-3 text-slate-700 font-medium">
                             <CheckCircle className="text-indigo-600" size={20} /> 
-                            <strong>City Suggestions:</strong> AI-powered suggestions for profitable stops between major markets.
+                            <strong>Show Scheduling:</strong> Drag-and-drop timeline with date, venue, and financial tracking.
                         </li>
                         <li className="flex items-center gap-3 text-slate-700 font-medium">
                             <CheckCircle className="text-indigo-600" size={20} /> 
-                            <strong>Conflict Detection:</strong> Instant alerts for impossible drives, double bookings, or venue restrictions.
+                            <strong>Status Tracking:</strong> Track shows through draft, hold, confirmed, and settled stages.
                         </li>
                     </ul>
                 </div>
@@ -555,15 +559,15 @@ export const Features: React.FC = () => {
                     <ul className="space-y-4 pt-4">
                         <li className="flex items-center gap-3 text-slate-700 font-medium">
                             <CheckCircle className="text-amber-600" size={20} /> 
-                            <strong>Pipeline View:</strong> Visualize Holds, Challenges, and Confirmed dates across all your venues.
+                            <strong>Pipeline View:</strong> See all your shows organized by status - draft, hold, confirmed.
                         </li>
                         <li className="flex items-center gap-3 text-slate-700 font-medium">
                             <CheckCircle className="text-amber-600" size={20} /> 
-                            <strong>Utilization Tracking:</strong> Spot vacancy gaps in your calendar and fill them faster.
+                            <strong>Venue Database:</strong> Keep track of all venues with capacity, contacts, and booking history.
                         </li>
                         <li className="flex items-center gap-3 text-slate-700 font-medium">
                             <CheckCircle className="text-amber-600" size={20} /> 
-                            <strong>Bulk Actions:</strong> (Pro) Send availabilities and hold requests to agents in bulk.
+                            <strong>Financial Overview:</strong> Track revenue across all your bookings with real-time reporting.
                         </li>
                     </ul>
                 </div>
@@ -603,7 +607,7 @@ export const Pricing: React.FC = () => {
             <p className="text-slate-600 mb-6 text-sm">For solo artists just getting started.</p>
             <div className="text-4xl font-extrabold text-slate-900 mb-6">$0<span className="text-lg font-normal text-slate-500">/mo</span></div>
             <Link to="/signup" className="w-full py-3 px-4 bg-white border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-colors mb-8 text-center">
-              Start for Free
+              Get Started Free
             </Link>
             <ul className="space-y-4 mb-8 flex-1">
               <li className="flex items-start gap-3 text-sm text-slate-700">
@@ -612,11 +616,15 @@ export const Pricing: React.FC = () => {
               </li>
               <li className="flex items-start gap-3 text-sm text-slate-700">
                 <CheckCircle className="text-emerald-500 shrink-0" size={18} />
-                <span>Basic Routing</span>
+                <span>Route Distance Tracking</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-slate-700">
                 <CheckCircle className="text-emerald-500 shrink-0" size={18} />
-                <span>Day Sheets</span>
+                <span>CSV Data Export</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-slate-700">
+                <CheckCircle className="text-emerald-500 shrink-0" size={18} />
+                <span>Venue & Vendor Management</span>
               </li>
             </ul>
           </div>
@@ -637,15 +645,19 @@ export const Pricing: React.FC = () => {
               </li>
               <li className="flex items-start gap-3 text-sm text-slate-700">
                 <CheckCircle className="text-indigo-600 shrink-0" size={18} />
-                <span>Smart Routing Engine</span>
+                <span>Route Cost Tracking</span>
               </li>
                <li className="flex items-start gap-3 text-sm text-slate-700">
                 <CheckCircle className="text-indigo-600 shrink-0" size={18} />
-                <span>Financial Forecasts</span>
+                <span>PDF Reports & Analytics</span>
               </li>
                <li className="flex items-start gap-3 text-sm text-slate-700">
                 <CheckCircle className="text-indigo-600 shrink-0" size={18} />
-                <span>Vendor Compliance Tools</span>
+                <span>Document Uploads</span>
+              </li>
+               <li className="flex items-start gap-3 text-sm text-slate-700">
+                <CheckCircle className="text-indigo-600 shrink-0" size={18} />
+                <span>Shareable Tour Links</span>
               </li>
             </ul>
           </div>
@@ -656,7 +668,7 @@ export const Pricing: React.FC = () => {
             <p className="text-slate-600 mb-6 text-sm">For booking agencies and large rosters.</p>
             <div className="text-4xl font-extrabold text-slate-900 mb-6">$99<span className="text-lg font-normal text-slate-500">/mo</span></div>
             <Link to="/signup" className="w-full py-3 px-4 bg-white border border-slate-300 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-colors mb-8 text-center">
-              Contact Sales
+              Get Started
             </Link>
             <ul className="space-y-4 mb-8 flex-1">
               <li className="flex items-start gap-3 text-sm text-slate-700">
@@ -665,15 +677,15 @@ export const Pricing: React.FC = () => {
               </li>
               <li className="flex items-start gap-3 text-sm text-slate-700">
                 <CheckCircle className="text-emerald-500 shrink-0" size={18} />
-                <span>Multi-User Access</span>
+                <span>Priority Support</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-slate-700">
-                <CheckCircle className="text-emerald-500 shrink-0" size={18} />
-                <span>API Access</span>
+              <li className="flex items-start gap-3 text-sm text-slate-600">
+                <CheckCircle className="text-slate-400 shrink-0" size={18} />
+                <span>Multi-User Access <span className="text-xs text-indigo-500 ml-1">(Coming Soon)</span></span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-slate-700">
-                <CheckCircle className="text-emerald-500 shrink-0" size={18} />
-                <span>White-label Reports</span>
+              <li className="flex items-start gap-3 text-sm text-slate-600">
+                <CheckCircle className="text-slate-400 shrink-0" size={18} />
+                <span>API Access <span className="text-xs text-indigo-500 ml-1">(Coming Soon)</span></span>
               </li>
             </ul>
           </div>

@@ -1,28 +1,87 @@
 import React, { useState } from 'react';
 import { useTour } from '../context/TourContext';
-import { Calendar, ChevronRight, Plus, Crown } from 'lucide-react';
+import { Calendar, ChevronRight, Plus, Crown, X, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import CreateTourWizard from './CreateTourWizard';
+
+// Upgrade Modal Component
+const UpgradeModal: React.FC<{ isOpen: boolean; onClose: () => void; onUpgrade: () => void }> = ({ isOpen, onClose, onUpgrade }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center">
+              <Crown className="text-indigo-400" size={24} />
+            </div>
+            <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Upgrade to Pro</h3>
+          <p className="text-slate-400 mb-6">
+            The Free plan includes 1 active tour. Upgrade to Pro for unlimited tours, PDF reports, and more.
+          </p>
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center gap-3 text-sm text-slate-300">
+              <Calendar size={16} className="text-indigo-400" />
+              <span>Unlimited tours</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-slate-300">
+              <MapPin size={16} className="text-indigo-400" />
+              <span>Route cost tracking</span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={onClose}
+              className="flex-1 px-4 py-3 border border-slate-600 text-slate-300 rounded-xl font-medium hover:bg-slate-700 transition-colors"
+            >
+              Maybe Later
+            </button>
+            <button 
+              onClick={onUpgrade}
+              className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+            >
+              View Plans
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const TourList: React.FC = () => {
   const { tours, user } = useTour();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleCreateClick = () => {
       // Upsell Check: Free tier limited to 1 tour
       if (user?.tier === 'Free' && tours.length >= 1) {
-          const confirmUpgrade = window.confirm("The Free plan is limited to 1 active tour. Upgrade to Pro for unlimited tours?");
-          if (confirmUpgrade) {
-              navigate('/app/settings'); // Direct to billing
-          }
+          setIsUpgradeModalOpen(true);
       } else {
           setIsWizardOpen(true);
       }
   };
 
+  const handleUpgrade = () => {
+      setIsUpgradeModalOpen(false);
+      navigate('/app/settings');
+  };
+
   return (
     <div className="space-y-6">
+      <UpgradeModal 
+        isOpen={isUpgradeModalOpen} 
+        onClose={() => setIsUpgradeModalOpen(false)} 
+        onUpgrade={handleUpgrade}
+      />
+      
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold text-white">Your Tours</h2>
         <button 
@@ -34,6 +93,23 @@ const TourList: React.FC = () => {
       </div>
 
       {isWizardOpen && <CreateTourWizard onClose={() => setIsWizardOpen(false)} />}
+
+      {/* Empty State */}
+      {tours.length === 0 && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
+          <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Calendar size={32} className="text-indigo-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Tours Yet</h3>
+          <p className="text-slate-400 mb-6 max-w-md mx-auto">Create your first tour to start tracking shows, finances, and logistics all in one place.</p>
+          <button 
+            onClick={() => setIsWizardOpen(true)}
+            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <Plus size={18} /> Create Your First Tour
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tours.map(tour => (

@@ -247,7 +247,7 @@ const Onboarding: React.FC = () => {
           icon: <Music2 size={32} className="text-emerald-400" />,
           title: "First Tour Setup",
           description: "We'll create a workspace for your upcoming run. Don't worry, you can add specific dates later.",
-          features: ["Smart Routing", "P&L Forecasting", "Crew Management"]
+          features: ["Route Distance Tracking", "Financial Tracking", "Vendor Management"]
       };
   };
 

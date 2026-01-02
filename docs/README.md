@@ -18,6 +18,8 @@ All project documentation is organized in this folder.
 
 ### 👤 User Guides
 
+- **[PRODUCT_FEATURES.md](./PRODUCT_FEATURES.md)** - ⭐ **Complete product features overview** - All features TourCommand offers
+- **[FEATURE_VERIFICATION.md](./FEATURE_VERIFICATION.md)** - 🔍 **Feature implementation verification** - Which features are implemented, where they are, and how to access them
 - **[SIGNUP_FLOW.md](./SIGNUP_FLOW.md)** - Complete signup and onboarding flow
 - **[USER_FLOW.md](./USER_FLOW.md)** - Detailed user journey documentation
 - **[COMPLETE_USER_JOURNEY.md](./COMPLETE_USER_JOURNEY.md)** - Comprehensive user journey map
@@ -28,6 +30,7 @@ All project documentation is organized in this folder.
 
 ### 🧪 Testing
 
+- **[COMPLETE_TESTING_CHECKLIST.md](./COMPLETE_TESTING_CHECKLIST.md)** - ⭐ **Complete user journey testing checklist** - All features and flows to test
 - **[LOCAL_TESTING_GUIDE.md](./LOCAL_TESTING_GUIDE.md)** - Step-by-step testing instructions
 - **[LOCAL_TESTING_CHECKLIST.md](./LOCAL_TESTING_CHECKLIST.md)** - Comprehensive testing checklist
 - **[LOCAL_TESTING_COMPLETE.md](./LOCAL_TESTING_COMPLETE.md)** - Complete local testing guide
@@ -105,13 +108,16 @@ All project documentation is organized in this folder.
 3. [DEPLOYMENT_SETUP_GUIDE.md](./DEPLOYMENT_SETUP_GUIDE.md) - Deploy to production
 
 **For Testing:**
-1. [LOCAL_TESTING_COMPLETE.md](./LOCAL_TESTING_COMPLETE.md) - Complete testing guide
-2. [LOCAL_TESTING_CHECKLIST.md](./LOCAL_TESTING_CHECKLIST.md) - Testing checklist
+1. [COMPLETE_TESTING_CHECKLIST.md](./COMPLETE_TESTING_CHECKLIST.md) - ⭐ **Complete user journey testing** - All features and flows
+2. [LOCAL_TESTING_COMPLETE.md](./LOCAL_TESTING_COMPLETE.md) - Complete testing guide
+3. [LOCAL_TESTING_CHECKLIST.md](./LOCAL_TESTING_CHECKLIST.md) - Testing checklist
 
 **For Understanding:**
-1. [COMPLETE_USER_JOURNEY.md](./COMPLETE_USER_JOURNEY.md) - User journey map
-2. [DATA_COLLECTION_AND_BILLING.md](./DATA_COLLECTION_AND_BILLING.md) - Data collection info
-3. [DATABASE_INFO.md](./DATABASE_INFO.md) - Database information
+1. [PRODUCT_FEATURES.md](./PRODUCT_FEATURES.md) - ⭐ **All product features** - Complete feature list
+2. [FEATURE_VERIFICATION.md](./FEATURE_VERIFICATION.md) - 🔍 **Feature verification** - What's implemented and where
+3. [COMPLETE_USER_JOURNEY.md](./COMPLETE_USER_JOURNEY.md) - User journey map
+4. [DATA_COLLECTION_AND_BILLING.md](./DATA_COLLECTION_AND_BILLING.md) - Data collection info
+5. [DATABASE_INFO.md](./DATABASE_INFO.md) - Database information
 
 **For Deployment:**
 1. [PRODUCTION_READINESS_ASSESSMENT.md](./PRODUCTION_READINESS_ASSESSMENT.md) - Current status

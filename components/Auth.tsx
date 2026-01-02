@@ -119,7 +119,7 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-md bg-white p-10 rounded-2xl border border-slate-200 shadow-2xl shadow-slate-200/50 animate-fade-in">
         <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back</h2>
-            <p className="text-slate-500">Sign in to your command center</p>
+            <p className="text-slate-500">Sign in to your account</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-5">
             <div>
@@ -130,7 +130,7 @@ export const Login: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
-                    placeholder="manager@band.com" 
+                    placeholder="you@company.com" 
                 />
             </div>
             <div>
@@ -157,6 +157,11 @@ export const Login: React.FC = () => {
                 {loading ? <Loader2 size={20} className="animate-spin" /> : null}
                 Sign In
             </button>
+            <div className="text-center pt-2">
+                 <Link to="/forgot-password" className="text-sm text-indigo-600 hover:underline">
+                    Forgot Password?
+                 </Link>
+            </div>
             <div className="text-center pt-4">
                  <p className="text-sm text-slate-500">
                     Don't have an account? <Link to="/signup" className="text-indigo-600 font-bold hover:underline">Sign up</Link>
@@ -474,7 +479,7 @@ export const Signup: React.FC = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
-                            placeholder="you@artist.com" 
+                            placeholder="you@company.com" 
                         />
                     </div>
                     <div>

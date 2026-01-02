@@ -146,9 +146,23 @@ const Vendors: React.FC = () => {
                       </div>
                   )}
               </div>
-          )) : (
+          )) : vendors.length === 0 ? (
+              <div className="col-span-full bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
+                  <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Users size={32} className="text-indigo-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Vendors Yet</h3>
+                  <p className="text-slate-400 mb-6 max-w-md mx-auto">Add vendors and crew members to keep track of contacts, compliance requirements, and service providers.</p>
+                  <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                  >
+                    <Plus size={18} /> Add Your First Vendor
+                  </button>
+              </div>
+          ) : (
               <div className="col-span-full text-center py-12 text-slate-500">
-                  <p>No vendors found matching your search.</p>
+                  <p>No vendors found matching "{search}".</p>
               </div>
           )}
       </div>

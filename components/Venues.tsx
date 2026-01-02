@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTour } from '../context/TourContext';
-import { MapPin, Mail, Plus } from 'lucide-react';
+import { MapPin, Mail, Plus, Building2 } from 'lucide-react';
 import { Venue } from '../types';
 import { Link } from 'react-router-dom';
 import Breadcrumbs from './Breadcrumbs';
@@ -36,7 +36,7 @@ const Venues: React.FC = () => {
       <Breadcrumbs items={[{ label: 'Venues' }]} />
       
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">Venue Database</h2>
+        <h2 className="text-2xl font-bold text-white">Venues</h2>
         <button 
             onClick={() => setIsAdding(true)}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
@@ -49,16 +49,45 @@ const Venues: React.FC = () => {
           <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl mb-6 animate-fade-in">
               <h3 className="text-white font-medium mb-4">Add New Venue</h3>
               <div className="grid grid-cols-2 gap-4 mb-4">
-                  <input placeholder="Venue Name" className="bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.name || ''} onChange={e => setNewVenue({...newVenue, name: e.target.value})} />
-                  <input placeholder="City" className="bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.city || ''} onChange={e => setNewVenue({...newVenue, city: e.target.value})} />
-                  <input placeholder="Capacity" type="number" className="bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.capacity || ''} onChange={e => setNewVenue({...newVenue, capacity: parseInt(e.target.value)})} />
-                  <input placeholder="Contact Email" className="bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.contactEmail || ''} onChange={e => setNewVenue({...newVenue, contactEmail: e.target.value})} />
+                  <div>
+                      <label className="block text-sm text-slate-400 mb-1">Venue Name *</label>
+                      <input placeholder="e.g., Madison Square Garden" className="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.name || ''} onChange={e => setNewVenue({...newVenue, name: e.target.value})} />
+                  </div>
+                  <div>
+                      <label className="block text-sm text-slate-400 mb-1">City *</label>
+                      <input placeholder="e.g., New York" className="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.city || ''} onChange={e => setNewVenue({...newVenue, city: e.target.value})} />
+                  </div>
+                  <div>
+                      <label className="block text-sm text-slate-400 mb-1">Capacity</label>
+                      <input placeholder="e.g., 5000" type="number" className="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.capacity || ''} onChange={e => setNewVenue({...newVenue, capacity: parseInt(e.target.value)})} />
+                  </div>
+                  <div>
+                      <label className="block text-sm text-slate-400 mb-1">Contact Email</label>
+                      <input placeholder="e.g., booking@venue.com" className="w-full bg-slate-900 border border-slate-700 p-2 rounded text-white" value={newVenue.contactEmail || ''} onChange={e => setNewVenue({...newVenue, contactEmail: e.target.value})} />
+                  </div>
               </div>
               <div className="flex gap-2">
                   <button onClick={handleAdd} className="bg-emerald-600 text-white px-4 py-2 rounded">Save Venue</button>
                   <button onClick={() => setIsAdding(false)} className="text-slate-400 px-4">Cancel</button>
               </div>
           </div>
+      )}
+
+      {/* Empty State */}
+      {venues.length === 0 && !isAdding && (
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
+          <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Building2 size={32} className="text-indigo-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Venues Yet</h3>
+          <p className="text-slate-400 mb-6 max-w-md mx-auto">Add venues to your database to quickly assign them to shows and keep track of contacts and capacity.</p>
+          <button 
+            onClick={() => setIsAdding(true)}
+            className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          >
+            <Plus size={18} /> Add Your First Venue
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

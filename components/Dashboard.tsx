@@ -52,16 +52,57 @@ const Dashboard: React.FC = () => {
     .filter(s => s.status === ShowStatus.HOLD)
     .slice(0, 3);
 
+  // Calculate show counts for progress
+  const getShowProgress = (tour: typeof tours[0]) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const pastShows = tour.shows.filter(s => new Date(s.date) < today).length;
+    const futureShows = tour.shows.filter(s => new Date(s.date) >= today).length;
+    const totalShows = tour.shows.length;
+    const progressPercent = totalShows > 0 ? Math.round((pastShows / totalShows) * 100) : 0;
+    return { pastShows, futureShows, totalShows, progressPercent };
+  };
+
   // --- PERSONA: ARTIST VIEW ---
   if (user?.role === 'Artist') {
+      // Empty state for artists with no tours
+      if (tours.length === 0) {
+        return (
+          <div className="space-y-8 animate-fade-in">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Welcome, {user?.name.split(' ')[0]}!</h1>
+              <p className="text-slate-400">Get started by creating your first tour.</p>
+            </div>
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
+              <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Calendar size={32} className="text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">No Tours Yet</h3>
+              <p className="text-slate-400 mb-6 max-w-md mx-auto">Create your first tour to start tracking shows, finances, and logistics all in one place.</p>
+              <Link to="/app/tours" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                Create Your First Tour <ArrowRight size={18} />
+              </Link>
+            </div>
+          </div>
+        );
+      }
+
+      const activeTour = tours[0];
+      const progress = getShowProgress(activeTour);
+
       return (
         <div className="space-y-8 animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user?.name.split(' ')[0]}!</h1>
-            <p className="text-slate-400">Your current tour profit is tracking <span className="text-emerald-400 font-medium">15% above target</span>.</p>
+            <p className="text-slate-400">
+              {netProfit > 0 
+                ? <>Your tour is generating <span className="text-emerald-400 font-medium">${netProfit.toLocaleString()}</span> in net profit.</>
+                : 'Track your tour progress and financials here.'
+              }
+            </p>
             {user?.tier === 'Free' && (
                 <div className="mt-4 p-3 bg-indigo-600/10 border border-indigo-600/20 rounded-lg inline-flex items-center gap-2 text-indigo-300 text-sm">
-                    <span>Unlock <strong>Smart Routing</strong> to find profitable cities nearby.</span>
+                    <span>Unlock <strong>route cost tracking</strong> and unlimited tours.</span>
                     <Link to="/app/settings" className="font-bold hover:underline">Upgrade to Pro</Link>
                 </div>
             )}
@@ -69,7 +110,7 @@ const Dashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FinancialCard title="Tour Revenue" amount={totalRevenue} type="revenue" />
-            <FinancialCard title="Net Profit (My Share)" amount={netProfit} type="profit" subtitle="Est. take home after expenses" />
+            <FinancialCard title="Net Profit" amount={netProfit} type="profit" subtitle="Revenue minus expenses" />
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-sm flex flex-col justify-between">
                  <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wide">Next Show</h3>
                  {upcomingShows[0] ? (
@@ -78,7 +119,7 @@ const Dashboard: React.FC = () => {
                          <div className="text-sm text-slate-500">{upcomingShows[0].venue} • {new Date(upcomingShows[0].date).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'})}</div>
                      </div>
                  ) : (
-                     <div className="text-slate-500 text-sm mt-2">No upcoming shows.</div>
+                     <div className="text-slate-500 text-sm mt-2">No upcoming shows scheduled.</div>
                  )}
             </div>
           </div>
@@ -87,24 +128,28 @@ const Dashboard: React.FC = () => {
             <div className="lg:col-span-2 space-y-8">
                  <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
                     <h3 className="text-lg font-semibold text-white mb-4">Your Active Tour</h3>
-                    {tours.slice(0,1).map(tour => (
-                        <div key={tour.id} className="bg-slate-900/50 p-4 rounded-lg border border-slate-800">
-                             <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h4 className="font-bold text-white text-lg">{tour.name}</h4>
-                                    <p className="text-slate-400 text-sm">{new Date(tour.startDate).toLocaleDateString()} - {new Date(tour.endDate).toLocaleDateString()}</p>
-                                </div>
-                                <Link to={`/app/tours/${tour.id}`} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Manage Tour</Link>
-                             </div>
+                    <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800">
+                         <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 className="font-bold text-white text-lg">{activeTour.name}</h4>
+                                <p className="text-slate-400 text-sm">{new Date(activeTour.startDate).toLocaleDateString()} - {new Date(activeTour.endDate).toLocaleDateString()}</p>
+                            </div>
+                            <Link to={`/app/tours/${activeTour.id}`} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Manage Tour</Link>
+                         </div>
+                         {progress.totalShows > 0 ? (
+                           <>
                              <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                                 <div className="bg-emerald-500 h-full w-[45%]"></div>
+                                 <div className="bg-emerald-500 h-full transition-all" style={{width: `${progress.progressPercent}%`}}></div>
                              </div>
                              <div className="flex justify-between text-xs text-slate-500 mt-2">
-                                 <span>12 shows played</span>
-                                 <span>8 shows remaining</span>
+                                 <span>{progress.pastShows} shows completed</span>
+                                 <span>{progress.futureShows} shows remaining</span>
                              </div>
-                        </div>
-                    ))}
+                           </>
+                         ) : (
+                           <p className="text-slate-500 text-sm">No shows added yet. <Link to={`/app/tours/${activeTour.id}`} className="text-indigo-400 hover:underline">Add your first show</Link></p>
+                         )}
+                    </div>
                 </div>
             </div>
             <div className="lg:col-span-1">
@@ -140,7 +185,7 @@ const Dashboard: React.FC = () => {
             <p className="text-slate-400">You have <span className="text-white font-bold">{actionItems.length} items</span> needing attention across your roster.</p>
              {user?.tier === 'Free' && (
                 <div className="mt-4 p-3 bg-indigo-600/10 border border-indigo-600/20 rounded-lg inline-flex items-center gap-2 text-indigo-300 text-sm">
-                    <span>Manage multiple artists? <strong>Unlock Team Roles</strong> to delegate tasks.</span>
+                    <span>Manage multiple artists? <strong>Unlock unlimited tours</strong> and PDF reports.</span>
                     <Link to="/app/settings" className="font-bold hover:underline">Upgrade to Pro</Link>
                 </div>
             )}
@@ -218,6 +263,11 @@ const Dashboard: React.FC = () => {
 
   // --- PERSONA: OPERATOR VIEW ---
   // Default fall-through for Operator or others
+  const confirmedShows = tours.flatMap(t => t.shows).filter(s => s.status === ShowStatus.CONFIRMED).length;
+  const holdShows = tours.flatMap(t => t.shows).filter(s => s.status === ShowStatus.HOLD).length;
+  const draftShows = tours.flatMap(t => t.shows).filter(s => s.status === ShowStatus.DRAFT).length;
+  const totalShows = tours.flatMap(t => t.shows).length;
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -225,7 +275,7 @@ const Dashboard: React.FC = () => {
         <p className="text-slate-400">Overview of booking activity and venue utilization.</p>
         {user?.tier === 'Free' && (
             <div className="mt-4 p-3 bg-indigo-600/10 border border-indigo-600/20 rounded-lg inline-flex items-center gap-2 text-indigo-300 text-sm">
-                <span>Booking multiple venues? <strong>Upgrade to Operator Pro</strong> for bulk tools.</span>
+                <span>Manage multiple venues? <strong>Upgrade to Pro</strong> for advanced features.</span>
                 <Link to="/app/settings" className="font-bold hover:underline">View Plans</Link>
             </div>
         )}
@@ -233,24 +283,20 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-            <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Total Confirmed</h3>
-            <div className="text-2xl font-bold text-emerald-400">
-                {tours.flatMap(t => t.shows).filter(s => s.status === ShowStatus.CONFIRMED).length}
-            </div>
+            <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Confirmed Shows</h3>
+            <div className="text-2xl font-bold text-emerald-400">{confirmedShows}</div>
         </div>
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-            <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Holds / Pending</h3>
-            <div className="text-2xl font-bold text-amber-400">
-                {tours.flatMap(t => t.shows).filter(s => s.status === ShowStatus.HOLD).length}
-            </div>
+            <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">On Hold</h3>
+            <div className="text-2xl font-bold text-amber-400">{holdShows}</div>
         </div>
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-             <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Active Offers</h3>
-             <div className="text-2xl font-bold text-white">4</div>
+             <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Draft Shows</h3>
+             <div className="text-2xl font-bold text-white">{draftShows}</div>
         </div>
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-5">
-             <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Avails Sent</h3>
-             <div className="text-2xl font-bold text-white">12</div>
+             <h3 className="text-slate-400 text-xs uppercase font-bold mb-1">Total Shows</h3>
+             <div className="text-2xl font-bold text-white">{totalShows}</div>
         </div>
       </div>
 

@@ -22,6 +22,12 @@ import { Login, Signup } from './components/Auth';
 import { Home, Features, Pricing } from './components/Marketing';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import NotFound from './components/NotFound';
+import { ForgotPassword } from './components/ForgotPassword';
+import { ResetPassword } from './components/ResetPassword';
+import { VerifyEmail } from './components/VerifyEmail';
+import { HelpSupport } from './components/HelpSupport';
+import { About } from './components/About';
 
 // -- Sidebar Component for Logged In App --
 const AppSidebar: React.FC<{ mobileMenuOpen: boolean, setMobileMenuOpen: (v: boolean) => void }> = ({ mobileMenuOpen, setMobileMenuOpen }) => {
@@ -147,6 +153,11 @@ const App: React.FC = () => {
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/help" element={<HelpSupport />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
 
@@ -162,6 +173,9 @@ const App: React.FC = () => {
                 <Route path="/app/vendors" element={<ProtectedLayout><Vendors /></ProtectedLayout>} />
                 <Route path="/app/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
                 <Route path="/app/assistant" element={<ProtectedLayout><Assistant /></ProtectedLayout>} />
+                
+                {/* 404 Catch-all - Must be last */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
         </TourProvider>
