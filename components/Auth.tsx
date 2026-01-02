@@ -300,14 +300,23 @@ export const Signup: React.FC = () => {
 
                 if (profileError) {
                     console.error('Failed to create user profile:', profileError);
-                    // Attempt to clean up auth user (optional - may require admin privileges)
-                    try {
-                        await supabase.auth.admin.deleteUser(data.user.id);
-                    } catch (cleanupError) {
-                        console.error('Failed to cleanup auth user:', cleanupError);
+                    
+                    // Provide helpful error message based on error type
+                    let errorMessage = 'Account created but profile setup failed. ';
+                    if (profileError.code === 'PGRST116' || profileError.message?.includes('404')) {
+                        errorMessage += 'The user_profiles table may not exist. Please run database migrations.';
+                    } else if (profileError.code === '23505') {
+                        errorMessage += 'A profile with this ID already exists.';
+                    } else if (profileError.code === '23514' || profileError.message?.includes('check constraint')) {
+                        errorMessage += 'Database constraint error. Please run migration 004_allow_null_role.sql to allow null roles.';
+                    } else if (profileError.message?.includes('null value') || profileError.message?.includes('NOT NULL')) {
+                        errorMessage += 'The role column does not allow NULL. Please run migration 004_allow_null_role.sql.';
+                    } else {
+                        errorMessage += `Error: ${profileError.message || 'Unknown error'}. Please contact support.`;
                     }
-                    setError('Account created but profile setup failed. Please contact support.');
-                    addToast('Profile creation failed. Please try signing up again or contact support.', 'error');
+                    
+                    setError(errorMessage);
+                    addToast('Profile creation failed. Please check the console for details.', 'error');
                     setLoading(false);
                     return;
                 }
