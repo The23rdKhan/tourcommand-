@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useToast } from './Toast';
 import { useTour } from '../context/TourContext';
 import { Music2, ArrowRight, Loader2 } from 'lucide-react';
+import { logError, logInfo } from '../utils/logger';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export const Login: React.FC = () => {
             });
 
           if (profileError) {
-            console.error('Failed to create user profile:', profileError);
+            logError('Failed to create user profile', profileError, { context: 'login' });
             setError('Account created but profile setup failed. Please contact support.');
             addToast('Profile creation failed. Please try logging in again.', 'error');
             setLoading(false);
@@ -209,6 +210,33 @@ export const Signup: React.FC = () => {
         }
     }, [isAuthenticated, authLoading, tours.length, venues.length, navigate]);
 
+    // Debug function to auto-fill and test signup
+    const handleDebugSignup = async () => {
+        const timestamp = Date.now();
+        const testEmail = `test-${timestamp}@example.com`;
+        
+        // Fill form fields
+        setFirstName('Test');
+        setLastName('User');
+        setEmail(testEmail);
+        setPassword('Test1234');
+        setConfirmPassword('Test1234');
+        setAcceptedTerms(true);
+        
+        // Clear any previous errors
+        setError('');
+        
+        // Wait a moment for state to update, then trigger signup
+        setTimeout(async () => {
+            // Create a synthetic form event and call handleSignup directly
+            const syntheticEvent = {
+                preventDefault: () => {},
+            } as React.FormEvent;
+            
+            await handleSignup(syntheticEvent);
+        }, 200);
+    };
+
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -286,39 +314,75 @@ export const Signup: React.FC = () => {
                 throw authError;
             }
 
-            if (data.user) {
-                // Create user profile with error handling
-                const { error: profileError } = await supabase
+            if (data.user && data.session) {
+                // Profile is automatically created by database trigger (migration 006)
+                // Wait a moment for trigger to complete, then verify profile exists
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // Verify profile was created by trigger
+                const { data: profile, error: profileCheckError } = await supabase
                     .from('user_profiles')
-                    .insert({
-                        id: data.user.id,
-                        name: fullName,
-                        email: email.trim(),
-                        role: null, // Will be set during onboarding
-                        tier: 'Free'
-                    });
+                    .select('id')
+                    .eq('id', data.user.id)
+                    .single();
 
-                if (profileError) {
-                    console.error('Failed to create user profile:', profileError);
+                if (profileCheckError || !profile) {
+                    logError('Profile not found after trigger', profileCheckError, { 
+                        context: 'signup',
+                        userId: data.user.id,
+                        triggerExpected: true
+                    });
                     
-                    // Provide helpful error message based on error type
-                    let errorMessage = 'Account created but profile setup failed. ';
-                    if (profileError.code === 'PGRST116' || profileError.message?.includes('404')) {
-                        errorMessage += 'The user_profiles table may not exist. Please run database migrations.';
-                    } else if (profileError.code === '23505') {
-                        errorMessage += 'A profile with this ID already exists.';
-                    } else if (profileError.code === '23514' || profileError.message?.includes('check constraint')) {
-                        errorMessage += 'Database constraint error. Please run migration 004_allow_null_role.sql to allow null roles.';
-                    } else if (profileError.message?.includes('null value') || profileError.message?.includes('NOT NULL')) {
-                        errorMessage += 'The role column does not allow NULL. Please run migration 004_allow_null_role.sql.';
+                    // Fallback: Try to create profile manually if trigger didn't work
+                    const { error: profileError } = await supabase
+                        .from('user_profiles')
+                        .insert({
+                            id: data.user.id,
+                            name: fullName,
+                            email: email.trim(),
+                            role: null, // Will be set during onboarding
+                            tier: 'Free'
+                        });
+
+                    if (profileError) {
+                        logError('Failed to create user profile (fallback)', profileError, { 
+                            context: 'signup',
+                            userId: data.user.id,
+                            errorCode: profileError.code,
+                            errorMessage: profileError.message
+                        });
+                        
+                        // Provide helpful error message based on error type
+                        let errorMessage = 'Account created but profile setup failed. ';
+                        if (profileError.code === 'PGRST116' || profileError.message?.includes('404')) {
+                            errorMessage += 'The user_profiles table may not exist. Please run database migrations.';
+                        } else if (profileError.code === '23505') {
+                            // Profile already exists (trigger created it) - this is OK
+                            // Continue with signup flow - don't show error
+                        } else if (profileError.code === '23514' || profileError.message?.includes('check constraint')) {
+                            errorMessage += 'Database constraint error. Please run migration 004_allow_null_role.sql to allow null roles.';
+                        } else if (profileError.message?.includes('null value') || profileError.message?.includes('NOT NULL')) {
+                            errorMessage += 'The role column does not allow NULL. Please run migration 004_allow_null_role.sql.';
+                        } else if (profileError.message?.includes('row-level security') || profileError.message?.includes('RLS')) {
+                            errorMessage += 'RLS policy error. The database trigger may not be set up. Please run migration 006_auto_create_profile_trigger.sql.';
+                        } else {
+                            errorMessage += `Error: ${profileError.message || 'Unknown error'}. Check browser console for details.`;
+                        }
+                        
+                        // Only show error if it's not a duplicate (23505)
+                        if (profileError.code !== '23505') {
+                            setError(errorMessage);
+                            addToast(`Database error: ${profileError.message || 'Profile creation failed'}`, 'error');
+                            setLoading(false);
+                            return;
+                        }
                     } else {
-                        errorMessage += `Error: ${profileError.message || 'Unknown error'}. Please contact support.`;
+                        // Profile created successfully via fallback
+                        logInfo('Profile created via fallback (trigger may not have worked)', { userId: data.user.id });
                     }
-                    
-                    setError(errorMessage);
-                    addToast('Profile creation failed. Please check the console for details.', 'error');
-                    setLoading(false);
-                    return;
+                } else {
+                    // Profile exists - trigger worked!
+                    logInfo('Profile created by trigger successfully', { userId: data.user.id });
                 }
 
                 addToast('Account created! Redirecting to role selection...', 'success');
@@ -327,11 +391,26 @@ export const Signup: React.FC = () => {
                 navigate('/app/onboarding');
             }
         } catch (err: unknown) {
+            logError('Signup error', err, { context: 'signup', step: 'auth_signup' });
+            
             const errorMessage = err instanceof Error 
                 ? err.message 
                 : 'Failed to create account';
-            setError(errorMessage);
-            addToast(errorMessage, 'error');
+            
+            // Provide more specific error message
+            let userFriendlyMessage = errorMessage;
+            if (errorMessage.includes('already registered') || errorMessage.includes('User already registered')) {
+                userFriendlyMessage = 'An account with this email already exists. Please log in instead.';
+            } else if (errorMessage.includes('email')) {
+                userFriendlyMessage = 'Invalid email address. Please check and try again.';
+            } else if (errorMessage.includes('password')) {
+                userFriendlyMessage = 'Password does not meet requirements. Please check and try again.';
+            } else {
+                userFriendlyMessage = `Database error: ${errorMessage}. Please check the browser console for details.`;
+            }
+            
+            setError(userFriendlyMessage);
+            addToast(userFriendlyMessage, 'error');
         } finally {
             setLoading(false);
         }
@@ -455,12 +534,31 @@ export const Signup: React.FC = () => {
                         {loading ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
                         Create Account
                     </button>
-                    <div className="text-center pt-4">
-                        <p className="text-sm text-slate-500">
-                            Already have an account? <Link to="/login" className="text-indigo-600 font-bold hover:underline">Log in</Link>
+                </form>
+                
+                {/* Debug Button - Only in Development */}
+                {process.env.NODE_ENV === 'development' && (
+                    <div className="mt-4 pt-4 border-t border-slate-200">
+                        <button
+                            type="button"
+                            onClick={handleDebugSignup}
+                            disabled={loading}
+                            className="w-full bg-amber-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            title="Debug: Auto-fill form and test signup"
+                        >
+                            🐛 Debug: Auto-Fill & Test Signup
+                        </button>
+                        <p className="text-xs text-slate-400 text-center mt-2">
+                            Development only - Fills form with test data and submits automatically
                         </p>
                     </div>
-                </form>
+                )}
+                
+                <div className="text-center pt-4">
+                    <p className="text-sm text-slate-500">
+                        Already have an account? <Link to="/login" className="text-indigo-600 font-bold hover:underline">Log in</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

@@ -71,7 +71,7 @@ TourCommand is a comprehensive tour management solution that helps artists, mana
    ```bash
    cp env.local.template .env.local
    ```
-   Then edit `.env.local` with your Supabase credentials (see [ENV_SETUP.md](./ENV_SETUP.md))
+   Then edit `.env.local` with your Supabase credentials (see [ENV_SETUP.md](./docs/ENV_SETUP.md))
 
 3. **Start the dev server:**
    ```bash
@@ -112,7 +112,7 @@ TourCommand is a comprehensive tour management solution that helps artists, mana
 
 3. **Set up Supabase:**
    
-   See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions.
+   See [SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md) for detailed instructions.
    
    **Quick steps:**
    - Create a new project at [supabase.com](https://supabase.com)
@@ -176,13 +176,13 @@ TourCommand is a comprehensive tour management solution that helps artists, mana
 **Environment variables not working:**
 - Make sure file is named `.env.local` (not `.env` or `.env.example`)
 - Restart the dev server after changing environment variables
-- Check [ENV_SETUP.md](./ENV_SETUP.md) for detailed help
+- Check [ENV_SETUP.md](./docs/ENV_SETUP.md) for detailed help
 
 **Database connection errors:**
 - Verify Supabase project is active
 - Check that migrations have been run
 - Verify API keys are correct in `.env.local`
-- See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for help
+- See [SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md) for help
 
 **Build errors:**
 - Delete `node_modules` and `package-lock.json`
@@ -219,24 +219,41 @@ tourcommand/
 │   └── Assistant.tsx       # AI assistant
 ├── context/                 # React Context (state management)
 │   └── TourContext.tsx     # Main app state
+├── docs/                    # Project documentation
+│   ├── README.md           # Documentation index
+│   ├── QUICK_START.md      # Quick setup guide
+│   ├── DEPLOYMENT_SETUP_GUIDE.md
+│   ├── LOCAL_TESTING_COMPLETE.md
+│   └── ... (40+ docs)
 ├── lib/                     # Utilities and helpers
 │   ├── supabase.ts         # Supabase client (client-side)
 │   ├── supabase-server.ts  # Supabase client (server-side)
 │   ├── validations.ts      # Zod schemas
 │   ├── errors.ts           # Custom error classes
 │   └── subscription.ts     # Subscription utilities
+├── scripts/                 # Utility scripts
+│   ├── run-migrations.js
+│   ├── verify-migrations.js
+│   └── check-db-schema.js
 ├── services/                # External service integrations
 │   └── geminiService.ts    # Gemini AI service
 ├── supabase/
-│   └── migrations/         # Database migrations
-│       ├── 001_initial_schema.sql
-│       ├── 002_add_indexes.sql
-│       └── 003_add_rls_policies.sql
+│   ├── migrations/         # Database migrations
+│   │   ├── 001_initial_schema.sql
+│   │   ├── 002_add_indexes.sql
+│   │   ├── 003_add_rls_policies.sql
+│   │   ├── 004_allow_null_role.sql
+│   │   ├── 005_fix_profile_creation_rls.sql
+│   │   └── 006_auto_create_profile_trigger.sql
+│   └── run-all-migrations-with-004.sql
 ├── utils/                   # Utility functions
 │   ├── analytics.ts        # Analytics tracking
-│   └── geo.ts              # Geographic utilities
+│   ├── errorHandler.ts     # Global error handling
+│   ├── geo.ts              # Geographic utilities
+│   └── logger.ts           # Logging utility
 ├── types.ts                 # TypeScript type definitions
 ├── App.tsx                  # Main app component
+├── README.md                # Project README
 └── vercel.json              # Vercel configuration
 ```
 
@@ -279,7 +296,7 @@ See `supabase/migrations/` for complete schema.
 ## 🧪 Testing
 
 ### Local Testing
-See [LOCAL_TESTING_GUIDE.md](./LOCAL_TESTING_GUIDE.md) for comprehensive testing instructions.
+See [LOCAL_TESTING_GUIDE.md](./docs/LOCAL_TESTING_GUIDE.md) for comprehensive testing instructions.
 
 **Quick test checklist:**
 - [ ] Sign up with new account
@@ -304,24 +321,24 @@ npm run test:e2e
 ## 📚 Documentation
 
 ### Getting Started
-- [QUICK_START.md](./QUICK_START.md) - Quick setup guide
-- [ENV_SETUP.md](./ENV_SETUP.md) - Environment variable setup
-- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - Database setup guide
+- [QUICK_START.md](./docs/QUICK_START.md) - Quick setup guide
+- [ENV_SETUP.md](./docs/ENV_SETUP.md) - Environment variable setup
+- [SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md) - Database setup guide
 
 ### User Guides
-- [SIGNUP_FLOW.md](./SIGNUP_FLOW.md) - Complete signup and onboarding flow
-- [USER_FLOW.md](./USER_FLOW.md) - Detailed user journey documentation
-- [LOCAL_TESTING_GUIDE.md](./LOCAL_TESTING_GUIDE.md) - Testing instructions
+- [SIGNUP_FLOW.md](./docs/SIGNUP_FLOW.md) - Complete signup and onboarding flow
+- [USER_FLOW.md](./docs/USER_FLOW.md) - Detailed user journey documentation
+- [LOCAL_TESTING_GUIDE.md](./docs/LOCAL_TESTING_GUIDE.md) - Testing instructions
 
 ### Development
-- [APPLICATION_FLOWS.md](./APPLICATION_FLOWS.md) - Application flow documentation
-- [CODE_REVIEW_ONBOARDING.md](./CODE_REVIEW_ONBOARDING.md) - Code review findings
-- [UI_BACKEND_ALIGNMENT_REVIEW.md](./UI_BACKEND_ALIGNMENT_REVIEW.md) - UI/Backend alignment
+- [APPLICATION_FLOWS.md](./docs/APPLICATION_FLOWS.md) - Application flow documentation
+- [CODE_REVIEW_ONBOARDING.md](./docs/CODE_REVIEW_ONBOARDING.md) - Code review findings
+- [UI_BACKEND_ALIGNMENT_REVIEW.md](./docs/UI_BACKEND_ALIGNMENT_REVIEW.md) - UI/Backend alignment
 
 ### Deployment
-- [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Step-by-step deployment guide
-- [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) - Production checklist
-- [END_TO_END_IMPLEMENTATION_VERIFICATION.md](./END_TO_END_IMPLEMENTATION_VERIFICATION.md) - Feature verification
+- [DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md) - Step-by-step deployment guide
+- [PRODUCTION_READINESS.md](./docs/PRODUCTION_READINESS.md) - Production checklist
+- [END_TO_END_IMPLEMENTATION_VERIFICATION.md](./docs/END_TO_END_IMPLEMENTATION_VERIFICATION.md) - Feature verification
 
 ## 🚢 Deployment
 
@@ -332,7 +349,7 @@ npm run test:e2e
 3. **Deploy** - Vercel will auto-detect Vite configuration
 4. **Test production URL**
 
-See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
+See [DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md) for detailed instructions.
 
 ### Environment Variables (Production)
 
@@ -442,9 +459,9 @@ Private project - All rights reserved
 ## 📞 Support
 
 For setup help, see the documentation files listed above or check:
-- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - Database setup
-- [ENV_SETUP.md](./ENV_SETUP.md) - Environment configuration
-- [LOCAL_TESTING_GUIDE.md](./LOCAL_TESTING_GUIDE.md) - Testing help
+- [SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md) - Database setup
+- [ENV_SETUP.md](./docs/ENV_SETUP.md) - Environment configuration
+- [LOCAL_TESTING_GUIDE.md](./docs/LOCAL_TESTING_GUIDE.md) - Testing help
 
 ---
 

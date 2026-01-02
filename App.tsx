@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { TourProvider, useTour } from './context/TourContext';
 import { ToastProvider } from './components/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LayoutDashboard, Calendar, MessageSquare, Menu, X, Music2, MapPin, Settings as SettingsIcon, LogOut, Users } from 'lucide-react';
 import { trackEvent } from './utils/analytics';
+import { setupGlobalErrorHandlers } from './utils/errorHandler';
 
 // Components
 import Dashboard from './components/Dashboard';
@@ -129,6 +130,11 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
 // -- Main App Component --
 const App: React.FC = () => {
+  // Setup global error handlers once on app start
+  useEffect(() => {
+    setupGlobalErrorHandlers();
+  }, []);
+
   return (
     <ErrorBoundary>
       <ToastProvider>

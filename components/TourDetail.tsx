@@ -4,7 +4,7 @@ import { useTour } from '../context/TourContext';
 import { useToast } from './Toast';
 import { ShowStatus, DealType, Show, Venue, Tour } from '../types';
 import Breadcrumbs from './Breadcrumbs';
-import { Plus, MapPin, DollarSign, Edit2, Trash2, ArrowRight, FileText, X, Download, Lock, Truck, AlertTriangle, Fuel, Clock, Check, Building2, User, Briefcase, Calendar } from 'lucide-react';
+import { Plus, MapPin, DollarSign, Edit2, Trash2, ArrowRight, FileText, X, Download, Lock, Truck, AlertTriangle, Fuel, Clock, Check, Building2, User, Briefcase, Calendar, Upload, Trash } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { trackEvent } from '../utils/analytics';
 import { calculateRouteMetrics } from '../utils/geo';
@@ -19,6 +19,8 @@ const TourDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'shows' | 'budget' | 'notes'>('overview');
   const [isAddShowModalOpen, setIsAddShowModalOpen] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ fileName: string; publicUrl: string; uploadedAt: string }>>([]);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Edit Tour State
   const [isEditTourModalOpen, setIsEditTourModalOpen] = useState(false);
@@ -596,10 +598,143 @@ const TourDetail: React.FC = () => {
         )}
         
         {activeTab === 'notes' && (
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center text-slate-400">
-                <FileText className="mx-auto mb-4 opacity-50" size={48} />
-                <h3 className="text-lg font-medium text-white mb-2">Tour Documents</h3>
-                <p>Upload contracts, riders, and day sheets here.</p>
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <h3 className="text-lg font-medium text-white mb-4">Tour Documents</h3>
+                <p className="text-slate-400 text-sm mb-6">Upload contracts, riders, and day sheets here.</p>
+                
+                {/* File Upload Area */}
+                <div className="mb-6">
+                    <label className="block mb-2">
+                        <input
+                            type="file"
+                            className="hidden"
+                            id="file-upload"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file || !tourId) return;
+                                
+                                setIsUploading(true);
+                                try {
+                                    const { supabase } = await import('../lib/supabase');
+                                    const { data: { session } } = await supabase.auth.getSession();
+                                    if (!session) {
+                                        addToast('Please log in to upload files', 'error');
+                                        return;
+                                    }
+
+                                    // Convert file to base64
+                                    const reader = new FileReader();
+                                    reader.onloadend = async () => {
+                                        const base64Data = reader.result as string;
+                                        const base64Content = base64Data.split(',')[1]; // Remove data:type;base64, prefix
+                                        
+                                        try {
+                                            const response = await fetch('/api/uploads/document', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'Authorization': `Bearer ${session.access_token}`
+                                                },
+                                                body: JSON.stringify({
+                                                    tourId,
+                                                    fileName: file.name,
+                                                    fileData: base64Content,
+                                                    fileType: file.type
+                                                })
+                                            });
+
+                                            if (response.ok) {
+                                                const data = await response.json();
+                                                setUploadedFiles(prev => [...prev, {
+                                                    fileName: data.fileName,
+                                                    publicUrl: data.publicUrl,
+                                                    uploadedAt: data.uploadedAt
+                                                }]);
+                                                addToast('File uploaded successfully', 'success');
+                                                trackEvent('file_uploaded', { tourId, fileName: file.name });
+                                            } else {
+                                                const error = await response.json();
+                                                addToast(error.error?.message || 'Failed to upload file', 'error');
+                                            }
+                                        } catch (error) {
+                                            addToast('Failed to upload file', 'error');
+                                        } finally {
+                                            setIsUploading(false);
+                                            // Reset input
+                                            e.target.value = '';
+                                        }
+                                    };
+                                    reader.readAsDataURL(file);
+                                } catch (error) {
+                                    setIsUploading(false);
+                                    addToast('Failed to upload file', 'error');
+                                }
+                            }}
+                            disabled={isUploading}
+                        />
+                        <div className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                            isUploading 
+                                ? 'border-slate-600 bg-slate-900/50 cursor-not-allowed' 
+                                : 'border-slate-600 hover:border-indigo-500 hover:bg-slate-900/50'
+                        }`}>
+                            {isUploading ? (
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                                    <p className="text-slate-400">Uploading...</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center gap-2">
+                                    <Upload className="text-slate-400" size={32} />
+                                    <p className="text-white font-medium">Click to upload or drag and drop</p>
+                                    <p className="text-slate-400 text-sm">PDF, DOC, DOCX, or images (max 10MB)</p>
+                                </div>
+                            )}
+                        </div>
+                    </label>
+                </div>
+
+                {/* Uploaded Files List */}
+                {uploadedFiles.length > 0 && (
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-slate-400 mb-2">Uploaded Files</h4>
+                        {uploadedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-700">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <FileText className="text-indigo-400 shrink-0" size={20} />
+                                    <div className="flex-1 min-w-0">
+                                        <a 
+                                            href={file.publicUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-white hover:text-indigo-400 truncate block"
+                                        >
+                                            {file.fileName}
+                                        </a>
+                                        <p className="text-xs text-slate-500">
+                                            {new Date(file.uploadedAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+                                        addToast('File removed from list', 'info');
+                                    }}
+                                    className="text-slate-400 hover:text-rose-400 p-1"
+                                    title="Remove from list"
+                                >
+                                    <Trash size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {uploadedFiles.length === 0 && !isUploading && (
+                    <div className="text-center py-8 text-slate-500 text-sm">
+                        No files uploaded yet. Click above to upload your first document.
+                    </div>
+                )}
             </div>
         )}
       </div>
