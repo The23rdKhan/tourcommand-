@@ -15,26 +15,33 @@
 - [ ] Go to `http://localhost:3000/#/signup`
 - [ ] Fill in **First Name** and **Last Name** (separate fields)
 - [ ] Enter **Email** (not "Work Email")
-- [ ] Enter **Password** (min 6 characters)
+- [ ] Enter **Password** (min 8 characters, must include uppercase, lowercase, and number)
 - [ ] Click "Create Account"
 - [ ] Verify redirect to `/app/onboarding`
 - [ ] Check browser console for errors
 
 ### Onboarding - Role Selection
+- [ ] **NEW**: User with existing tours tries to access /onboarding → Should redirect to dashboard
+- [ ] **NEW**: User with existing venues tries to access /onboarding → Should redirect to dashboard
 - [ ] Enter your name in onboarding Step 1
 - [ ] Select **Artist** role → Verify tour form appears in Step 2
 - [ ] Go back, select **Manager** role → Verify tour form appears
 - [ ] Go back, select **Operator** role → Verify venue form appears
 - [ ] Complete onboarding with **Artist** role
 - [ ] Verify redirect to tour detail page
+- [ ] **NEW**: Try to access /onboarding again → Should redirect to dashboard
 
 ### Login
 - [ ] Logout (if logged in)
 - [ ] Go to `http://localhost:3000/#/login`
+- [ ] Try to submit with empty email → Should show error
+- [ ] Try to submit with empty password → Should show error
+- [ ] **NEW**: Verify no hardcoded credentials work (should require actual input)
 - [ ] Enter email and password
 - [ ] Click "Sign In"
 - [ ] Verify redirect to `/app/dashboard`
 - [ ] Check that user data loads correctly
+- [ ] **NEW**: Try to access /login while logged in → Should redirect
 
 ---
 

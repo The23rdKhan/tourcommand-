@@ -10,14 +10,19 @@
    - User clicks: "Create Account"
    - **Validation**: 
      - Passwords must match
-     - Password must be at least 6 characters
+     - Password must be at least 8 characters with:
+       - At least one uppercase letter
+       - At least one lowercase letter
+       - At least one number
+     - First name and last name are required
      - Terms of Service must be accepted
 
 2. **Account Created** ✅
    - Supabase creates `auth.users` record
-   - User profile created in `user_profiles` table
+   - User profile created in `user_profiles` table with `role: null` (will be set during onboarding)
    - **User is automatically logged in** (Supabase handles session)
    - Success message: "Account created! Redirecting to role selection..."
+   - **Error handling**: If profile creation fails, user sees error message and account creation is rolled back
 
 3. **Redirect to Role Selection** (`/app/onboarding`)
    - User is **already authenticated** (no need to sign in again)
@@ -68,7 +73,12 @@ Create Account Button
   ↓
 Validation:
   - Passwords match? ✅
-  - Password length >= 6? ✅
+  - Password length >= 8? ✅
+  - Password has uppercase? ✅
+  - Password has lowercase? ✅
+  - Password has number? ✅
+  - First name provided? ✅
+  - Last name provided? ✅
   - Terms accepted? ✅
   ↓
 Supabase auth.signUp()
@@ -116,9 +126,19 @@ User can now use full app
 
 - [ ] Sign up with matching passwords → Should work
 - [ ] Sign up with non-matching passwords → Should show error
+- [ ] Sign up with weak password (< 8 chars) → Should show specific error
+- [ ] Sign up with password missing uppercase → Should show specific error
+- [ ] Sign up with password missing lowercase → Should show specific error
+- [ ] Sign up with password missing number → Should show specific error
+- [ ] Sign up without first name → Should show error
+- [ ] Sign up without last name → Should show error
 - [ ] Sign up without accepting terms → Should show error
+- [ ] Sign up with duplicate email → Should show friendly error message
 - [ ] Sign up successfully → Should redirect to `/app/onboarding`
 - [ ] Verify user is logged in (can access protected routes)
+- [ ] Try to access /login while logged in → Should redirect
+- [ ] Try to access /signup while logged in → Should redirect
 - [ ] Complete onboarding → Should create tour/venue
+- [ ] Try to access /onboarding after completion → Should redirect to dashboard
 - [ ] Check email for verification link (optional)
 

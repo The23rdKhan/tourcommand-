@@ -6,7 +6,7 @@ import { User, Music2, Calendar, MapPin, CheckCircle, ArrowRight, Building2, Glo
 import { Tour, Show, ShowStatus, DealType, Venue } from '../types';
 
 const Onboarding: React.FC = () => {
-  const { updateUser, addTour, addVenue, addShow, user, session } = useTour();
+  const { updateUser, addTour, addVenue, addShow, user, session, tours, venues } = useTour();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -35,6 +35,14 @@ const Onboarding: React.FC = () => {
       city: '',
       capacity: 0
   });
+
+  // Check if onboarding is already completed
+  useEffect(() => {
+    if (user && (tours.length > 0 || venues.length > 0)) {
+      addToast("You've already completed onboarding", 'info');
+      navigate('/app/dashboard');
+    }
+  }, [user, tours.length, venues.length, navigate, addToast]);
 
   // Pre-fill name from user context
   useEffect(() => {

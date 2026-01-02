@@ -19,6 +19,8 @@ import Settings from './components/Settings';
 import Onboarding from './components/Onboarding';
 import { Login, Signup } from './components/Auth';
 import { Home, Features, Pricing } from './components/Marketing';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 // -- Sidebar Component for Logged In App --
 const AppSidebar: React.FC<{ mobileMenuOpen: boolean, setMobileMenuOpen: (v: boolean) => void }> = ({ mobileMenuOpen, setMobileMenuOpen }) => {
@@ -139,6 +141,8 @@ const App: React.FC = () => {
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
 
                 {/* Protected App Routes */}
                 <Route path="/app" element={<Navigate to="/app/dashboard" />} />

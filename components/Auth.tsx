@@ -1,26 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useToast } from './Toast';
+import { useTour } from '../context/TourContext';
 import { Music2, ArrowRight, Loader2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { isAuthenticated, loading: authLoading, user, tours, venues } = useTour();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      // Check if user has completed onboarding
+      if (tours.length > 0 || venues.length > 0) {
+        navigate('/app/dashboard');
+      } else {
+        navigate('/app/onboarding');
+      }
+    }
+  }, [isAuthenticated, authLoading, tours.length, venues.length, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    // Validate inputs
+    if (!email.trim()) {
+      setError('Email is required');
+      setLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError('Password is required');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email || 'manager@band.com',
-        password: password || 'demo123'
+        email: email.trim(),
+        password: password
       });
 
       if (authError) throw authError;
@@ -35,27 +62,47 @@ export const Login: React.FC = () => {
 
         if (!profile) {
           // Create profile from auth user
-          await supabase
+          const { error: profileError } = await supabase
             .from('user_profiles')
             .insert({
               id: data.user.id,
               name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
               email: data.user.email || '',
-              role: 'Manager',
+              role: null, // Will be set during onboarding
               tier: 'Free'
             });
+
+          if (profileError) {
+            console.error('Failed to create user profile:', profileError);
+            setError('Account created but profile setup failed. Please contact support.');
+            addToast('Profile creation failed. Please try logging in again.', 'error');
+            setLoading(false);
+            return;
+          }
         }
 
         addToast('Logged in successfully', 'success');
         navigate('/app/dashboard');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to log in');
-      addToast(err.message || 'Failed to log in', 'error');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Failed to log in';
+      setError(errorMessage);
+      addToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-indigo-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 font-sans">
@@ -120,9 +167,27 @@ export const Login: React.FC = () => {
   );
 };
 
+// Password validation utility function
+const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+        return 'Password must be at least 8 characters';
+    }
+    if (!/[A-Z]/.test(password)) {
+        return 'Password must contain at least one uppercase letter';
+    }
+    if (!/[a-z]/.test(password)) {
+        return 'Password must contain at least one lowercase letter';
+    }
+    if (!/[0-9]/.test(password)) {
+        return 'Password must contain at least one number';
+    }
+    return null;
+};
+
 export const Signup: React.FC = () => {
     const navigate = useNavigate();
     const { addToast } = useToast();
+    const { isAuthenticated, loading: authLoading, tours, venues } = useTour();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -132,20 +197,56 @@ export const Signup: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    // Redirect authenticated users
+    useEffect(() => {
+        if (!authLoading && isAuthenticated) {
+            // Check if user has completed onboarding
+            if (tours.length > 0 || venues.length > 0) {
+                navigate('/app/dashboard');
+            } else {
+                navigate('/app/onboarding');
+            }
+        }
+    }, [isAuthenticated, authLoading, tours.length, venues.length, navigate]);
+
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Validation
+        // Validate name fields
+        const firstNameTrimmed = firstName.trim();
+        const lastNameTrimmed = lastName.trim();
+
+        if (!firstNameTrimmed) {
+            setError('First name is required');
+            setLoading(false);
+            return;
+        }
+
+        if (!lastNameTrimmed) {
+            setError('Last name is required');
+            setLoading(false);
+            return;
+        }
+
+        // Validate email
+        if (!email.trim()) {
+            setError('Email is required');
+            setLoading(false);
+            return;
+        }
+
+        // Validate password
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             setLoading(false);
             return;
         }
 
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters');
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            setError(passwordError);
             setLoading(false);
             return;
         }
@@ -157,7 +258,7 @@ export const Signup: React.FC = () => {
         }
 
         // Combine first and last name
-        const fullName = `${firstName.trim()} ${lastName.trim()}`.trim() || email.split('@')[0];
+        const fullName = `${firstNameTrimmed} ${lastNameTrimmed}`;
 
         try {
             const { data, error: authError } = await supabase.auth.signUp({
@@ -172,32 +273,69 @@ export const Signup: React.FC = () => {
                 }
             });
 
-            if (authError) throw authError;
+            if (authError) {
+                // Check for duplicate email
+                if (authError.message?.includes('already registered') || 
+                    authError.message?.includes('User already registered') ||
+                    authError.code === 'signup_disabled') {
+                    setError('An account with this email already exists. Please log in instead.');
+                    addToast('An account with this email already exists. Please log in instead.', 'error');
+                    setLoading(false);
+                    return;
+                }
+                throw authError;
+            }
 
             if (data.user) {
-                // Create user profile
-                await supabase
+                // Create user profile with error handling
+                const { error: profileError } = await supabase
                     .from('user_profiles')
                     .insert({
                         id: data.user.id,
                         name: fullName,
-                        email: email,
-                        role: 'Manager',
+                        email: email.trim(),
+                        role: null, // Will be set during onboarding
                         tier: 'Free'
                     });
+
+                if (profileError) {
+                    console.error('Failed to create user profile:', profileError);
+                    // Attempt to clean up auth user (optional - may require admin privileges)
+                    try {
+                        await supabase.auth.admin.deleteUser(data.user.id);
+                    } catch (cleanupError) {
+                        console.error('Failed to cleanup auth user:', cleanupError);
+                    }
+                    setError('Account created but profile setup failed. Please contact support.');
+                    addToast('Profile creation failed. Please try signing up again or contact support.', 'error');
+                    setLoading(false);
+                    return;
+                }
 
                 addToast('Account created! Redirecting to role selection...', 'success');
                 // User is automatically logged in after signup (Supabase handles session)
                 // Flow: Sign Up → Role Selection (Onboarding) → Create Tour/Venue → Dashboard
                 navigate('/app/onboarding');
             }
-        } catch (err: any) {
-            setError(err.message || 'Failed to create account');
-            addToast(err.message || 'Failed to create account', 'error');
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error 
+                ? err.message 
+                : 'Failed to create account';
+            setError(errorMessage);
+            addToast(errorMessage, 'error');
         } finally {
             setLoading(false);
         }
     };
+
+    // Show loading state while checking authentication
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <Loader2 size={32} className="animate-spin text-indigo-600" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 font-sans">
@@ -259,8 +397,8 @@ export const Signup: React.FC = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
-                            placeholder="Create a password (min 6 characters)" 
-                            minLength={6}
+                            placeholder="Min 8 chars, 1 uppercase, 1 lowercase, 1 number" 
+                            minLength={8}
                         />
                     </div>
                     <div>
@@ -272,7 +410,7 @@ export const Signup: React.FC = () => {
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
                             placeholder="Confirm your password" 
-                            minLength={6}
+                            minLength={8}
                         />
                     </div>
                     <div className="flex items-start gap-3">
@@ -286,13 +424,13 @@ export const Signup: React.FC = () => {
                         />
                         <label htmlFor="terms" className="text-sm text-slate-600">
                             I agree to the{' '}
-                            <a href="/terms" target="_blank" className="text-indigo-600 hover:underline font-medium">
+                            <Link to="/terms" className="text-indigo-600 hover:underline font-medium">
                                 Terms of Service
-                            </a>
+                            </Link>
                             {' '}and{' '}
-                            <a href="/privacy" target="_blank" className="text-indigo-600 hover:underline font-medium">
+                            <Link to="/privacy" className="text-indigo-600 hover:underline font-medium">
                                 Privacy Policy
-                            </a>
+                            </Link>
                         </label>
                     </div>
                     {error && (

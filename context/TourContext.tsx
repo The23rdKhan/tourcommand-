@@ -151,7 +151,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser({
           name: data.name,
           email: data.email,
-          role: data.role,
+          role: data.role || null, // Handle null role from database
           tier: data.tier
         });
       }

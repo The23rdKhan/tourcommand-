@@ -113,6 +113,6 @@ export type SubscriptionTier = 'Free' | 'Pro' | 'Agency';
 export interface UserProfile {
   name: string;
   email: string;
-  role: 'Artist' | 'Manager' | 'Operator';
+  role: 'Artist' | 'Manager' | 'Operator' | null; // null during signup, set during onboarding
   tier: SubscriptionTier;
 }
