@@ -20,6 +20,7 @@ interface TourContextType {
   setActiveTourId: (id: string | null) => void;
   addTour: (tour: Omit<Tour, 'id'>) => Promise<Tour>;
   updateTour: (tour: Tour) => Promise<void>;
+  deleteTour: (tourId: string) => Promise<void>;
   addShow: (tourId: string, show: Omit<Show, 'id'>) => Promise<Show>;
   updateShow: (tourId: string, show: Show) => Promise<void>;
   deleteShow: (tourId: string, showId: string) => Promise<void>;
@@ -331,6 +332,18 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addToast('Tour updated', 'success');
   };
 
+  const deleteTour = async (tourId: string) => {
+    await apiCall(`tours/${tourId}`, {
+      method: 'DELETE'
+    });
+
+    setTours(tours.filter(t => t.id !== tourId));
+    if (activeTourId === tourId) {
+      setActiveTourId(null);
+    }
+    addToast('Tour deleted', 'info');
+  };
+
   const addShow = async (tourId: string, show: Omit<Show, 'id'>): Promise<Show> => {
     const newShow = await apiCall('shows', {
       method: 'POST',
@@ -471,6 +484,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setActiveTourId, 
       addTour,
       updateTour,
+      deleteTour,
       addShow, 
       updateShow, 
       deleteShow,

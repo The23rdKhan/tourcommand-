@@ -125,8 +125,10 @@ export const Signup: React.FC = () => {
     const { addToast } = useToast();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -134,6 +136,25 @@ export const Signup: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // Validation
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            setLoading(false);
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters');
+            setLoading(false);
+            return;
+        }
+
+        if (!acceptedTerms) {
+            setError('You must accept the Terms of Service to continue');
+            setLoading(false);
+            return;
+        }
 
         // Combine first and last name
         const fullName = `${firstName.trim()} ${lastName.trim()}`.trim() || email.split('@')[0];
@@ -165,7 +186,9 @@ export const Signup: React.FC = () => {
                         tier: 'Free'
                     });
 
-                addToast('Account created! Please check your email to verify your account.', 'success');
+                addToast('Account created! Redirecting to role selection...', 'success');
+                // User is automatically logged in after signup (Supabase handles session)
+                // Flow: Sign Up → Role Selection (Onboarding) → Create Tour/Venue → Dashboard
                 navigate('/app/onboarding');
             }
         } catch (err: any) {
@@ -239,6 +262,38 @@ export const Signup: React.FC = () => {
                             placeholder="Create a password (min 6 characters)" 
                             minLength={6}
                         />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            required 
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all" 
+                            placeholder="Confirm your password" 
+                            minLength={6}
+                        />
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <input 
+                            type="checkbox" 
+                            id="terms"
+                            required
+                            checked={acceptedTerms}
+                            onChange={(e) => setAcceptedTerms(e.target.checked)}
+                            className="mt-1 w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                        />
+                        <label htmlFor="terms" className="text-sm text-slate-600">
+                            I agree to the{' '}
+                            <a href="/terms" target="_blank" className="text-indigo-600 hover:underline font-medium">
+                                Terms of Service
+                            </a>
+                            {' '}and{' '}
+                            <a href="/privacy" target="_blank" className="text-indigo-600 hover:underline font-medium">
+                                Privacy Policy
+                            </a>
+                        </label>
                     </div>
                     {error && (
                         <div className="text-rose-600 text-sm bg-rose-50 p-3 rounded-lg">

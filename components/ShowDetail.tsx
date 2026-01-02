@@ -9,7 +9,7 @@ import { Save, Calendar, MapPin, DollarSign, Truck, Shirt, AlertCircle, Clock, P
 const ShowDetail: React.FC = () => {
   const { tourId, showId } = useParams();
   const navigate = useNavigate();
-  const { tours, venues, updateShow, addVenue } = useTour();
+  const { tours, venues, updateShow, deleteShow, addVenue } = useTour();
   
   const tour = tours.find(t => t.id === tourId);
   const show = tour?.shows.find(s => s.id === showId);
@@ -232,12 +232,27 @@ const ShowDetail: React.FC = () => {
               <Calendar size={16} /> {new Date(formData.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
            </p>
         </div>
-        <button 
-          onClick={handleSave}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg shadow-indigo-900/20"
-        >
-          <Save size={18} /> Save Changes
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleSave}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg shadow-indigo-900/20"
+          >
+            <Save size={18} /> Save Changes
+          </button>
+          <button
+            onClick={async () => {
+              if (window.confirm('Are you sure you want to delete this show?')) {
+                if (tourId && showId) {
+                  await deleteShow(tourId, showId);
+                  navigate(`/app/tours/${tourId}`);
+                }
+              }
+            }}
+            className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg shadow-rose-900/20"
+          >
+            <Trash2 size={18} /> Delete Show
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}

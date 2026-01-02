@@ -12,7 +12,7 @@ import { calculateRouteMetrics } from '../utils/geo';
 const TourDetail: React.FC = () => {
   const { tourId } = useParams();
   const navigate = useNavigate();
-  const { tours, addShow, updateShow, deleteShow, updateTour, user, venues, addVenue, updateVenue } = useTour();
+  const { tours, addShow, updateShow, deleteShow, updateTour, deleteTour, user, venues, addVenue, updateVenue } = useTour();
   const { addToast } = useToast();
   const tour = tours.find(t => t.id === tourId);
 
@@ -231,6 +231,18 @@ const TourDetail: React.FC = () => {
                     title="Edit Tour Details"
                 >
                     <Edit2 size={18} />
+                </button>
+                <button 
+                    onClick={async () => {
+                        if (window.confirm('Are you sure you want to delete this tour? This will also delete all shows associated with it.')) {
+                            await deleteTour(tour.id);
+                            navigate('/app/tours');
+                        }
+                    }}
+                    className="text-slate-500 hover:text-rose-400 transition-colors p-1.5 hover:bg-slate-800 rounded-lg"
+                    title="Delete Tour"
+                >
+                    <Trash2 size={18} />
                 </button>
             </div>
             <p className="text-slate-400 text-sm flex items-center gap-2">

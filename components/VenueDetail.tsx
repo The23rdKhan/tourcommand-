@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTour } from '../context/TourContext';
 import Breadcrumbs from './Breadcrumbs';
-import { MapPin, Mail, User, Info, Calendar } from 'lucide-react';
+import { MapPin, Mail, User, Info, Calendar, Edit2, X, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ShowStatus } from '../types';
+import { ShowStatus, Venue } from '../types';
+import { useToast } from './Toast';
 
 const VenueDetail: React.FC = () => {
   const { venueId } = useParams();
-  const { venues, tours } = useTour();
+  const { venues, tours, updateVenue } = useTour();
+  const { addToast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState<Partial<Venue>>({});
   
   // Try to find by ID first, then by exact name match (decoded from URL)
   const venue = venues.find(v => v.id === venueId || v.name === venueId);
@@ -40,36 +44,115 @@ const VenueDetail: React.FC = () => {
                         <span className="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-sm">{venue.capacity} Capacity</span>
                     </div>
                  </div>
-                 {/* Placeholder for Edit Action */}
-                 <button className="text-slate-400 hover:text-white text-sm font-medium">Edit Venue</button>
+                 <button 
+                   onClick={() => {
+                     if (isEditing) {
+                       setIsEditing(false);
+                       setEditData({});
+                     } else {
+                       setIsEditing(true);
+                       setEditData({
+                         name: venue.name,
+                         city: venue.city,
+                         capacity: venue.capacity,
+                         contactName: venue.contactName,
+                         contactEmail: venue.contactEmail,
+                         notes: venue.notes
+                       });
+                     }
+                   }}
+                   className="text-slate-400 hover:text-white text-sm font-medium flex items-center gap-2"
+                 >
+                   {isEditing ? <X size={16} /> : <Edit2 size={16} />}
+                   {isEditing ? 'Cancel' : 'Edit Venue'}
+                 </button>
              </div>
          </div>
          <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
              <div>
                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Contact Info</h3>
-                 <div className="space-y-4">
-                     <div className="flex items-center gap-3">
-                         <User className="text-indigo-400" size={20} />
+                 {isEditing ? (
+                     <div className="space-y-4">
                          <div>
-                             <p className="text-slate-300 font-medium">{venue.contactName || 'No contact name'}</p>
-                             <p className="text-xs text-slate-500">Promoter / Buyer</p>
+                             <label className="block text-xs text-slate-400 mb-1">Contact Name</label>
+                             <input
+                                 type="text"
+                                 value={editData.contactName || ''}
+                                 onChange={(e) => setEditData({ ...editData, contactName: e.target.value })}
+                                 className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                                 placeholder="Contact name"
+                             />
+                         </div>
+                         <div>
+                             <label className="block text-xs text-slate-400 mb-1">Contact Email</label>
+                             <input
+                                 type="email"
+                                 value={editData.contactEmail || ''}
+                                 onChange={(e) => setEditData({ ...editData, contactEmail: e.target.value })}
+                                 className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                                 placeholder="contact@venue.com"
+                             />
+                         </div>
+                         <div>
+                             <label className="block text-xs text-slate-400 mb-1">Capacity</label>
+                             <input
+                                 type="number"
+                                 value={editData.capacity || 0}
+                                 onChange={(e) => setEditData({ ...editData, capacity: parseInt(e.target.value) || 0 })}
+                                 className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                                 placeholder="0"
+                             />
+                         </div>
+                         <button
+                             onClick={async () => {
+                                 if (venue) {
+                                     await updateVenue({ ...venue, ...editData } as Venue);
+                                     setIsEditing(false);
+                                     setEditData({});
+                                     addToast('Venue updated', 'success');
+                                 }
+                             }}
+                             className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                         >
+                             <Save size={16} /> Save Changes
+                         </button>
+                     </div>
+                 ) : (
+                     <div className="space-y-4">
+                         <div className="flex items-center gap-3">
+                             <User className="text-indigo-400" size={20} />
+                             <div>
+                                 <p className="text-slate-300 font-medium">{venue.contactName || 'No contact name'}</p>
+                                 <p className="text-xs text-slate-500">Promoter / Buyer</p>
+                             </div>
+                         </div>
+                         <div className="flex items-center gap-3">
+                             <Mail className="text-indigo-400" size={20} />
+                             <div>
+                                 <p className="text-slate-300 font-medium">{venue.contactEmail || 'No email'}</p>
+                                 <p className="text-xs text-slate-500">Email</p>
+                             </div>
                          </div>
                      </div>
-                     <div className="flex items-center gap-3">
-                         <Mail className="text-indigo-400" size={20} />
-                         <div>
-                             <p className="text-slate-300 font-medium">{venue.contactEmail || 'No email'}</p>
-                             <p className="text-xs text-slate-500">Email</p>
-                         </div>
-                     </div>
-                 </div>
+                 )}
              </div>
              <div>
                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Notes</h3>
-                 <div className="flex items-start gap-3 p-4 bg-slate-900 rounded-lg">
-                     <Info className="text-slate-400 shrink-0 mt-1" size={18} />
-                     <p className="text-slate-300 text-sm leading-relaxed">{venue.notes || "No notes added for this venue yet."}</p>
-                 </div>
+                 {isEditing ? (
+                     <div>
+                         <textarea
+                             value={editData.notes || ''}
+                             onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
+                             className="w-full bg-slate-900 border border-slate-600 rounded p-3 text-white text-sm min-h-[100px]"
+                             placeholder="Add notes about this venue..."
+                         />
+                     </div>
+                 ) : (
+                     <div className="flex items-start gap-3 p-4 bg-slate-900 rounded-lg">
+                         <Info className="text-slate-400 shrink-0 mt-1" size={18} />
+                         <p className="text-slate-300 text-sm leading-relaxed">{venue.notes || "No notes added for this venue yet."}</p>
+                     </div>
+                 )}
              </div>
          </div>
       </div>

@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTour } from '../context/TourContext';
-import { User, Music2, Calendar, MapPin, CheckCircle, ArrowRight, Building2, Globe, DollarSign, Loader2, Shield, TrendingUp } from 'lucide-react';
+import { useToast } from './Toast';
+import { User, Music2, Calendar, MapPin, CheckCircle, ArrowRight, Building2, Globe, DollarSign, Loader2, Shield, TrendingUp, AlertCircle, Mail } from 'lucide-react';
 import { Tour, Show, ShowStatus, DealType, Venue } from '../types';
 
 const Onboarding: React.FC = () => {
-  const { updateUser, addTour, addVenue, user } = useTour();
+  const { updateUser, addTour, addVenue, addShow, user, session } = useTour();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState<boolean>(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Step 1: Profile
   const [profile, setProfile] = useState({
@@ -31,37 +36,143 @@ const Onboarding: React.FC = () => {
       capacity: 0
   });
 
+  // Pre-fill name from user context
+  useEffect(() => {
+    if (user?.name && !profile.name) {
+      setProfile(prev => ({ ...prev, name: user.name }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]); // Intentionally only depend on user - we don't want to re-run when profile.name changes
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Check email verification status
+  useEffect(() => {
+    const checkEmailVerification = async () => {
+      if (session?.user) {
+        setEmailVerified(session.user.email_confirmed_at !== null);
+      }
+    };
+    checkEmailVerification();
+  }, [session]);
+
+  // Validation functions
+  const isFutureDate = (date: string) => {
+    const selectedDate = new Date(date + 'T00:00:00'); // Force local time
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return selectedDate >= today;
+  };
+
+  const validateTourData = () => {
+    if (!tourData.name.trim()) {
+      return 'Tour name is required';
+    }
+    if (tourData.name.trim().length < 2) {
+      return 'Tour name must be at least 2 characters';
+    }
+    if (!isFutureDate(tourData.startDate)) {
+      return 'Start date must be today or in the future';
+    }
+    return null;
+  };
+
+  const validateVenueData = () => {
+    if (!venueData.name.trim()) {
+      return 'Venue name is required';
+    }
+    if (venueData.name.trim().length < 2) {
+      return 'Venue name must be at least 2 characters';
+    }
+    if (!venueData.city.trim()) {
+      return 'City is required';
+    }
+    if (venueData.capacity <= 0) {
+      return 'Capacity must be greater than 0';
+    }
+    return null;
+  };
+
+  const validateProfile = () => {
+    const trimmedName = profile.name.trim();
+    if (!trimmedName) {
+      return 'Name is required';
+    }
+    if (trimmedName.length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
+  };
+
   const handleFinish = async () => {
     setIsSubmitting(true);
+    setError(null);
     
     try {
+      // Validate profile
+      const profileError = validateProfile();
+      if (profileError) {
+        setError(profileError);
+        setIsSubmitting(false);
+        return;
+      }
+
       // 1. Update Profile
       await updateUser({
-          name: profile.name,
+          name: profile.name.trim(),
           role: profile.role,
           tier: 'Free' // Default
       });
+      addToast('Profile updated', 'success');
 
       // 2. Branch Logic based on Role
       if (profile.role === 'Operator') {
+          // Validate venue data
+          const venueError = validateVenueData();
+          if (venueError) {
+            setError(venueError);
+            setIsSubmitting(false);
+            return;
+          }
+
           // Create Venue
           const newVenue = await addVenue({
-              name: venueData.name,
-              city: venueData.city,
+              name: venueData.name.trim(),
+              city: venueData.city.trim(),
               capacity: venueData.capacity,
-              contactName: profile.name,
+              contactName: profile.name.trim(),
               contactEmail: user?.email || '',
               notes: 'Main Venue'
           });
-          navigate(`/app/venues/${newVenue.id}`);
+          addToast('Venue created! Redirecting...', 'success');
+          
+          // Brief delay to show success message
+          timeoutRef.current = setTimeout(() => {
+            navigate(`/app/venues/${newVenue.id}`);
+          }, 500);
       } else {
+          // Validate tour data
+          const tourError = validateTourData();
+          if (tourError) {
+            setError(tourError);
+            setIsSubmitting(false);
+            return;
+          }
+
           // Create Tour & Draft Show
           const endDate = new Date(tourData.startDate);
           endDate.setMonth(endDate.getMonth() + 1);
           
           const newTour = await addTour({
-              name: tourData.name,
-              artist: profile.role === 'Artist' ? profile.name : 'My Roster Artist',
+              name: tourData.name.trim(),
+              artist: profile.role === 'Artist' ? profile.name.trim() : 'My Roster Artist',
               startDate: tourData.startDate,
               endDate: endDate.toISOString().split('T')[0],
               region: tourData.region,
@@ -87,9 +198,19 @@ const Onboarding: React.FC = () => {
               }
           });
 
-          navigate(`/app/tours/${newTour.id}`);
+          addToast('Tour created! Redirecting...', 'success');
+          
+          // Brief delay to show success message
+          timeoutRef.current = setTimeout(() => {
+            navigate(`/app/tours/${newTour.id}`);
+          }, 500);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to complete setup. Please try again.';
+      setError(errorMessage);
+      addToast(errorMessage, 'error');
       console.error('Error completing onboarding:', error);
     } finally {
       setIsSubmitting(false);
@@ -190,6 +311,22 @@ const Onboarding: React.FC = () => {
 
                 {step === 1 && (
                     <div className="space-y-8 animate-fade-in">
+                        {/* Email Verification Banner */}
+                        {user && !emailVerified && (
+                            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-center gap-2">
+                                <Mail size={20} className="text-amber-600" />
+                                <span className="text-sm">Please check your email to verify your account.</span>
+                            </div>
+                        )}
+
+                        {/* Error Display */}
+                        {error && (
+                            <div className="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-lg flex items-center gap-2">
+                                <AlertCircle size={20} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">First Name</label>
                             <input 
@@ -212,7 +349,7 @@ const Onboarding: React.FC = () => {
                                 ].map((role) => (
                                     <button
                                         key={role.id}
-                                        onClick={() => setProfile({...profile, role: role.id as any})}
+                                        onClick={() => setProfile({...profile, role: role.id as 'Artist' | 'Manager' | 'Operator'})}
                                         className={`p-5 rounded-xl border text-left transition-all flex items-center gap-4 group ${
                                             profile.role === role.id 
                                             ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/20' 
@@ -232,8 +369,16 @@ const Onboarding: React.FC = () => {
                         </div>
 
                         <button 
-                            onClick={() => setStep(2)}
-                            disabled={!profile.name}
+                            onClick={() => {
+                                setError(null); // Clear previous errors
+                                const validationError = validateProfile();
+                                if (validationError) {
+                                    setError(validationError);
+                                } else {
+                                    setStep(2);
+                                }
+                            }}
+                            disabled={!profile.name.trim()}
                             className="w-full bg-white text-slate-900 py-4 rounded-xl font-bold text-lg hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                         >
                             Continue <ArrowRight size={20} />
@@ -243,6 +388,14 @@ const Onboarding: React.FC = () => {
 
                 {step === 2 && profile.role !== 'Operator' && (
                     <div className="space-y-8 animate-fade-in">
+                        {/* Error Display */}
+                        {error && (
+                            <div className="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-lg flex items-center gap-2">
+                                <AlertCircle size={20} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">Tour Name</label>
                             <input 
@@ -302,7 +455,10 @@ const Onboarding: React.FC = () => {
 
                         <div className="flex gap-4">
                             <button 
-                                onClick={() => setStep(1)}
+                                onClick={() => {
+                                    setError(null); // Clear errors when going back
+                                    setStep(1);
+                                }}
                                 className="px-6 py-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                             >
                                 Back
@@ -320,6 +476,14 @@ const Onboarding: React.FC = () => {
 
                 {step === 2 && profile.role === 'Operator' && (
                     <div className="space-y-8 animate-fade-in">
+                        {/* Error Display */}
+                        {error && (
+                            <div className="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-lg flex items-center gap-2">
+                                <AlertCircle size={20} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">Venue Name</label>
                             <input 
@@ -350,7 +514,13 @@ const Onboarding: React.FC = () => {
                                     className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none"
                                     placeholder="e.g. 500"
                                     value={venueData.capacity || ''}
-                                    onChange={e => setVenueData({...venueData, capacity: parseInt(e.target.value)})}
+                                    onChange={e => {
+                                        const value = e.target.value;
+                                        const numValue = value === '' ? 0 : parseInt(value, 10);
+                                        if (!isNaN(numValue)) {
+                                            setVenueData({...venueData, capacity: numValue});
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>
@@ -365,7 +535,10 @@ const Onboarding: React.FC = () => {
 
                         <div className="flex gap-4">
                             <button 
-                                onClick={() => setStep(1)}
+                                onClick={() => {
+                                    setError(null); // Clear errors when going back
+                                    setStep(1);
+                                }}
                                 className="px-6 py-4 rounded-xl font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                             >
                                 Back
